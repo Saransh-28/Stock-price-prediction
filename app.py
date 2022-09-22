@@ -1,11 +1,13 @@
 # IMPORT REQUIRED MODULES
 
+import talib as ta
 import numpy as np
 import pandas as pd
 from keras.models import Sequential
 from keras.layers import Dense, LSTM ,Dropout
 import matplotlib.pyplot as plt
 import yfinance as yf
+from tensorflow.keras.models import Sequential
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras import layers
 from sklearn import metrics
@@ -16,14 +18,16 @@ from scipy import stats
 token = str(input('Enter the token - '))
 interval = str(input('Enter the interval Valid intervals: [1m, 2m, 5m, 15m, 30m, 60m, 90m, 1h, 1d, 5d, 1wk, 1mo, 3mo] - '))
 date = str(input('Enter the start date in YYYY-MM-DD format - '))
+end = str(input('Enter the end date in YYYY-MM-DD format - '))
 
 # LOAD THE DATA 
-df = yf.download(token ,interval=interval,start_date=date)
+df = yf.download(token ,interval=interval,start=date,end=end)
 while df.shape[0] == 0:
     token = str(input('Enter the token - '))
     interval = str(input('Enter the interval Valid intervals: [1m, 2m, 5m, 15m, 30m, 60m, 90m, 1h, 1d, 5d, 1wk, 1mo, 3mo] - '))
     date = str(input('Enter the start date in YYYY-MM-DD format - '))
-    df = yf.download(token ,interval=interval,start=date)
+    end = str(input('Enter the end date in YYYY-MM-DD format - '))
+    df = yf.download(token ,interval=interval,start=date,end=end)
 
 # CREATE ARTIFICIAL VARIABLES 
 
@@ -167,8 +171,8 @@ history = model.fit(X_train, y_train, epochs=150, validation_split=0.2,
 # SAVE THE MODEL
 model.save(f'{token}_model.h5')
 with open(f'{token}_features.txt', 'wb') as f:
-    f.write(','.join(x for x in X_col))
-    f.write(','.join(y for x in y_col))
+    f.write('features - ' + ','.join(x for x in X_col))
+    f.write('predict columns - '+','.join(y for x in y_col))
     
 # PRINT THE COMPARISON MATRICS 
 y_pred = model.predict(X_test)
@@ -182,5 +186,7 @@ file = str(input('Enter the file name of the new data - '))
 X_pred = pd.read_csv(file)
 y_pred = model.predict(X_pred)
 plt.figure(figsize=(15,9))
-sns.lineplot([i for i in range(len(y_pred))] , y_pred)
+sns.lineplot([i for i in range(len(y_pred))] , y_pred[:,0])
+sns.lineplot([i for i in range(len(y_pred))] , y_pred[:,1])
+sns.lineplot([i for i in range(len(y_pred))] , y_pred[:,2])
 plt.show()
