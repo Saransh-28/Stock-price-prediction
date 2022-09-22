@@ -34,6 +34,8 @@ while df.shape[0] == 0:
 for i in range(20,150,10):
     df[f'SMA_{i}'] = ta.SMA(df['Close'] , i)
     df[f'EMA_{i}'] = ta.EMA(df['Close'], i)
+    df[f'VMA_{i}'] = ta.SMA(df['Volume'] , i)
+    df[f'V/VMA_{i}'] = df['Volume']/df[f'VMA_{i}']
     
 for i in range(7,150,7):
     df[f'RSI_{i}'] = ta.RSI(df['Close'],i)
@@ -49,8 +51,8 @@ for i in range(72):
     df[f'L_{i+1}'] = df['Low'].shift(i+1)
     df[f'H_{i+1}'] = df['High'].shift(i+1)
 
-    df[f'O/C_{i+1}'] = df['Open'] / df['Close']
-    df[f'H/L_{i+1}'] = df['High'] / df['Low']
+    df[f'O/C_{i+1}'] = df[f'O_{i+1}'] / df[f'C_{i+1}']
+    df[f'H/L_{i+1}'] = df[f'H_{i+1}'] / df[f'L_{i+1}']
 
 for i in range(3):
     df[f'to_predict_{i+1}'] = df['Close'].shift(-(i+1))
