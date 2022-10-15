@@ -29,7 +29,32 @@ while df.shape[0] == 0:
     end = str(input('Enter the end date in YYYY-MM-DD format - '))
     df = yf.download(token ,interval=interval,start=date,end=end)
 
+#  RSI VALUE
+
+def rsi(df, periods = 14, ema = True):
+    close_delta = df['close'].diff()
+
+    # Make two series: one for lower closes and one for higher closes
+    up = close_delta.clip(lower=0)
+    down = -1 * close_delta.clip(upper=0)
+    
+    if ema == True:
+	    # Use exponential moving average
+        ma_up = up.ewm(com = periods - 1, adjust=True, min_periods = periods).mean()
+        ma_down = down.ewm(com = periods - 1, adjust=True, min_periods = periods).mean()
+    else:
+        # Use simple moving average
+        ma_up = up.rolling(window = periods, adjust=False).mean()
+        ma_down = down.rolling(window = periods, adjust=False).mean()
+        
+    rsi = ma_up / ma_down
+    rsi = 100 - (100/(1 + rsi))
+    return rsi
+    
 # CREATE ARTIFICIAL VARIABLES 
+
+for i in range(7,49,7):
+    df[f'RSI_{i}'] = rsi(df,period=i)
 
 for i in range(20,150,10):
     df[f'SMA_{i}'] = ta.SMA(df['Close'] , i)
